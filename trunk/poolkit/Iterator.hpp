@@ -45,12 +45,12 @@ bool operator !=(const Iterator& other)
 
 T* operator->()
 {
-	return m_itr;
+	return &(*m_itr);
 }
 
-T& unwrap()
+ContainerIterator unwrap()
 {
-	return *m_itr;
+	return m_itr;
 }
 };
 
