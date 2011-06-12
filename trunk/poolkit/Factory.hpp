@@ -1,9 +1,9 @@
 #ifndef FACTORY_HPP
 #define FACTORY_HPP
 
+#include "defs.hpp"
 #include <deque>
 #include <utility>
-#include <limits>
 #include <iterator>
 #include <iostream>
 #include <functional>
@@ -30,8 +30,6 @@ typedef internal::Iterator<typename Container::iterator> iterator;
 typedef internal::Iterator<typename Container::iterator, internal::UNSAFE> unsafe_iterator; 
 
 private:
-#define INIT_POOLSIZE 10
-#define MAX_POOLSIZE numeric_limits<size_t>::max()
 Container dec;
 size_t m_maxSize;
 boost::optional<pair<T, bool> > m_default; //Does this need to be optional?
@@ -139,6 +137,8 @@ iterator acquire()
 			return ret;
 		}
 		
+		//Make newsize 2*n +1. The +1 is to take care of the condition where dec.size() is 0. 
+		//Keep doing this until we reach the max size.
 		size_t newsize = 2*dec.size() + 1;
 		if(newsize > m_maxSize)
 			newsize =m_maxSize;
