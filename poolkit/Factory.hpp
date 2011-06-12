@@ -127,6 +127,8 @@ inline unsafe_iterator end_unsafe()
 	return unsafe_iterator(dec.end());
 }
 
+//Return the next in the pool if available, if not reallocate the pool to a new size.
+//If we have reached the max pool size, return the end.
 iterator acquire()
 {
 	iterator ret = dec.end();
@@ -157,11 +159,12 @@ bool release(iterator param)
 	if(!m_default)
 		return false;
 
+	//Set the value of the passed iterator to default
 	*param.unwrap() = *m_default;
-	if(next != dec.begin())
+	if(next != dec.begin()) // If this was not the only acquired resource
 	{
-		typename Container::iterator top = next;
-		iter_swap(param.unwrap(), top);
+		//Swap with the one behind next and make next the next free resource
+		iter_swap(param.unwrap(), --next);
 	}
 	
 	return true;
@@ -182,13 +185,15 @@ void reset()
 	fill(begin_unsafe(), end_unsafe(), *m_default);
 }
 
-//Returns how many resources are used so far in the pool
+//Returns how many resources are used so far in the pool. Prefer distance over count_if as distance 
+//will be an O(1) operation here as we have enforced a random access iterator
 size_t used()
 {
 	return distance(dec.begin(), next);	
 }
 
-//Returns how many resources are remaining in the pool
+//Returns how many resources are remaining in the pool. Prefer distance over count_if as distance 
+//will be an O(1) operation here as we have enforced a random access iterator
 size_t free()
 {
 	return distance(next, dec.end());

@@ -119,7 +119,6 @@ const Iterator<ContainerIterator, false>& operator=(const ContainerIterator& oth
         return *this;
 }
 
-
 bool operator==(const Iterator& other)
 {
 	return (m_itr == other.m_itr);
