@@ -35,7 +35,7 @@ private:
 Container dec;
 size_t m_maxSize;
 boost::optional<pair<T, bool> > m_default; //Does this need to be optional?
-unsafe_iterator next;
+typename Container::iterator  next;
 
 inline bool _init(size_t initSize)
 {
@@ -48,7 +48,7 @@ if(!m_default)
 
 if(_resize(initSize))
 {
-	next= unsafe_iterator(dec.begin());
+	next= dec.begin();
 	return true;
 }
 return false;
@@ -130,7 +130,7 @@ inline unsafe_iterator end_unsafe()
 iterator acquire()
 {
 	iterator ret = dec.end();
-	if(end_unsafe() == next)
+	if(dec.end() == next)
 	{
 		if(dec.size() >= m_maxSize)
 		{
@@ -151,32 +151,41 @@ iterator acquire()
 	return iterator(next++);
 }
 
+//Release a resource back to the pool
 bool release(iterator param)
 {
 	if(!m_default)
 		return false;
 
-	param.unwrap() = *m_default;
-	if(next != begin_unsafe())
+	*param.unwrap() = *m_default;
+	if(next != dec.begin())
 	{
-		unsafe_iterator top = next;
-		//iter_swap(param, top);
+		typename Container::iterator top = next;
+		iter_swap(param.unwrap(), top);
 	}
 	
 	return true;
 }
 
+//Re-arranges the used and unused resources
 void rearrange()
 {
 	 next = partition(dec.begin(), dec.end(), !boost::bind(&pair<T, bool>::second, _1)); 
 }
 
+//Resets all elemts to default
 void reset()
 {
 	if(!m_default)
 		return;
 
 	fill(begin_unsafe(), end_unsafe(), *m_default);
+}
+
+//Returns how many resources are used so far in the pool
+size_t used()
+{
+	return distance(dec.begin(), next);	
 }
 
 };
