@@ -188,6 +188,12 @@ size_t used()
 	return distance(dec.begin(), next);	
 }
 
+//Returns how many resources are remaining in the pool
+size_t free()
+{
+	return distance(next, dec.end());
+}
+
 };
 
 #endif
