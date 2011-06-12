@@ -25,7 +25,7 @@ template <typename T, typename Container = deque< pair<T, bool> > >
 class Pool
 {
 public:
-//Safe version of the iterator is return from the class by default
+//Safe version of the iterator is return out by default
 typedef internal::Iterator<typename Container::iterator> iterator; 
 typedef internal::Iterator<typename Container::iterator, internal::UNSAFE> unsafe_iterator; 
 
@@ -173,7 +173,7 @@ bool release(iterator param)
 //Re-arranges the used and unused resources
 void rearrange()
 {
-	 next = partition(dec.begin(), dec.end(), !boost::bind(&pair<T, bool>::second, _1)); 
+	 next = partition(dec.begin(), dec.end(), boost::bind(&pair<T, bool>::second, _1)); 
 }
 
 //Resets all elemts to default
@@ -183,6 +183,7 @@ void reset()
 		return;
 
 	fill(begin_unsafe(), end_unsafe(), *m_default);
+	next = dec.begin();
 }
 
 //Returns how many resources are used so far in the pool. Prefer distance over count_if as distance 
