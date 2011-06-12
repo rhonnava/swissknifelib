@@ -20,12 +20,13 @@
 #include <boost/static_assert.hpp>
 
 using namespace std;
-
+//The resource pool
 template <typename T, typename Container = deque< pair<T, bool> > >
 class Pool
 {
 public:
-typedef internal::Iterator<typename Container::iterator> iterator;
+//Safe version of the iterator is return from the class by default
+typedef internal::Iterator<typename Container::iterator> iterator; 
 typedef internal::Iterator<typename Container::iterator, internal::UNSAFE> unsafe_iterator; 
 
 private:
