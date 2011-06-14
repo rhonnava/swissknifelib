@@ -161,11 +161,12 @@ bool release(iterator param)
 
 	//Set the value of the passed iterator to default
 	*param.unwrap() = *m_default;
-	if(next != dec.begin()) // If this was not the only acquired resource
-	{
-		//Swap with the one behind next and make next the next free resource
-		iter_swap(param.unwrap(), --next);
-	}
+
+	//Swap with the one behind next and make next the next free resource. If next is at the begin
+	//the this is the first resoure to be freed. Swap with next itself. All this activity is to ensure
+	//we partition the acquired resources to the begin and free ones to the end of the pool and next
+	//points to the first free resource
+	iter_swap(param.unwrap(), ((next != dec.begin()) ? --next: next));
 	
 	return true;
 }
