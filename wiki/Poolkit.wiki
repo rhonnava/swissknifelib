@@ -1,0 +1,10 @@
+#summary One-sentence summary of this page.
+
+= Introduction =
+
+Further direction for Poolkit 
+
+
+= Details =
+
+Poolkit gives out two iterators, a safe version that does not walk the pool. You can only access elements in the pool. There is an unsafe_iterator that can walk the pool if you need. You can also convert one kind to the other. Currently even unsafe_iterator can not be used with many STL algorithms as it is not yet a fully functional iterator with different operators and different typedefs that iterator_traits requires.
