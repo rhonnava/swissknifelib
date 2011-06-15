@@ -7,6 +7,24 @@ namespace internal
 {
 
 enum {SAFE=true, UNSAFE=false};
+
+//What I am doing is a very bad idea theoritically as an iterator is not a kind of Common. 
+// But there is a lot of commonality between the safe and unsafe iterators. So there is a 
+// lot of code repetition. So, doing a public inheritance. Please suggest if you have a 
+// better idea.FYI, I want to keep the the template specialization as Iterator is the most 
+// legible name and also want to challenge the always never rule.
+template <typename ContainerIterator>
+struct Common
+{
+    typedef typename iterator_traits<ContainerIterator>::value_type T; 
+    typedef T         value_type;
+    typedef ptrdiff_t  difference_type;
+    typedef T*   pointer;
+    typedef T& reference;
+    typedef random_access_iterator_tag  iterator_category;
+
+};
+
 //The default version
 template <typename ContainerIterator, bool bparam = true>
 class Iterator{
@@ -16,7 +34,7 @@ Iterator(){}
 
 //The safe version
 template<typename ContainerIterator>
-class Iterator<ContainerIterator, true>
+class Iterator<ContainerIterator, true> : public Common<ContainerIterator>
 {
 typedef typename iterator_traits<ContainerIterator>::value_type T;
 ContainerIterator m_itr;
@@ -55,8 +73,8 @@ ContainerIterator unwrap()
 };
 
 //The unsafe version
-template<typename ContainerIterator>
-class Iterator<ContainerIterator, false>
+template<typename ContainerIterator> 
+class Iterator<ContainerIterator, false> : public Common<ContainerIterator>
 {
 typedef typename iterator_traits<ContainerIterator>::value_type T;
 ContainerIterator m_itr;
