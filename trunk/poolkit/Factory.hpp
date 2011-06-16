@@ -26,8 +26,8 @@ class Pool
 {
 public:
 //Safe version of the iterator is return out by default
-typedef internal::Iterator<typename Container::iterator> iterator; 
-typedef internal::Iterator<typename Container::iterator, internal::UNSAFE> unsafe_iterator; 
+typedef Iterator<typename Container::iterator> iterator; 
+typedef Iterator<typename Container::iterator, UNSAFE> unsafe_iterator; 
 
 private:
 Container dec;

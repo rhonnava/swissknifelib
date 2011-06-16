@@ -4,8 +4,7 @@
 #include <iterator>
 #include "internal/Iterator.hpp"
 
-namespace internal
-{
+using namespace internal;
 
 enum {SAFE=true, UNSAFE=false};
 
@@ -24,38 +23,29 @@ class Iterator<ContainerIterator, true>
 ContainerIterator m_itr;
 friend class Iterator<ContainerIterator, false>;
 public:
-ITERATOR_TYPEDEFS
 
 Iterator(){}
 Iterator(ContainerIterator itr) : m_itr(itr)
 {
 }
 
-//Constructor that takes in the unsafe version
-Iterator(const Iterator<ContainerIterator, false>& other)
+//Copy constructor that takes in the unsafe version
+Iterator(const Iterator& other)
 {
 	m_itr = other.m_itr;	
-}
-
-bool operator==(const Iterator& other)
-{
-	return (m_itr == other.m_itr);
 }
 
 bool operator !=(const Iterator& other)
 {
 	return (m_itr != other.m_itr);
 }
+ITERATOR_TYPEDEFS
 
-T* operator->()
-{
-	return &(*m_itr);
-}
+OPERATOR_ARROW
 
-ContainerIterator unwrap()
-{
-	return m_itr;
-}
+UNWRAP_FUNC
+
+OPERATOR_COMPARISON
 };
 
 //The unsafe version
@@ -101,6 +91,8 @@ bool operator!=(const Iterator<ContainerIterator, false>& other)
 {
 	return (m_itr != other.m_itr);
 }
+
+
 Iterator(ContainerIterator itr) : m_itr(itr)
 {
 }
@@ -124,21 +116,11 @@ const Iterator<ContainerIterator, false>& operator=(const ContainerIterator& oth
         return *this;
 }
 
-bool operator==(const Iterator& other)
-{
-	return (m_itr == other.m_itr);
-}
+OPERATOR_ARROW
 
-T* operator->()
-{
-	return &(*m_itr);
-}
+UNWRAP_FUNC
 
-ContainerIterator unwrap()
-{
-	return m_itr;
-}
+OPERATOR_COMPARISON
 
 };
-}//namespace internal
 #endif
