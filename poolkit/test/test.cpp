@@ -32,6 +32,10 @@ int main()
 	t.acquire();
 	t.acquire();
 	t.acquire();
+
+	//Testing if iterator traits work on the iterator
+	iterator_traits<Pool<Tester>::iterator>::iterator_category cat;
+
 	cout << "The used count is: " << t.used() << endl;
 	(obj->first).print();
 	t.release(obj);

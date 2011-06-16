@@ -31,7 +31,7 @@ Iterator(ContainerIterator itr) : m_itr(itr)
 {
 }
 
-//Copy constructor that takes in the unsafe version
+//Constructor that takes in the unsafe version
 Iterator(const Iterator<ContainerIterator, false>& other)
 {
 	m_itr = other.m_itr;	
