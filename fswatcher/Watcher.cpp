@@ -2,23 +2,28 @@
 
 using namespace std;
 
-Watcher::Watcher()
+Watcher::Watcher(bool blocking)
 {
-	if (-1 == inotify_init1(O_NONBLOCK))
+	m_inotifyFD = inotify_init1(O_NONBLOCK);
+
+	if (-1 == m_inotifyFD)
 	{
-		throw Exception(L"Unable to initialize watch"); //Add strerror once Exception class is ready
+		throw Exception(L"Unable to initialize Watcher"); //Add strerror once Exception class is ready
 	}
 }
 
-bool Watcher::registerHandler(boost::function<void(void)> handler)
+void Watcher::registerHandler(const boost::function<void(void)>& handler )
 {
-	cout << "registering handler" << endl;
-	return true;
+	m_handler = handler;
 }
 
 bool Watcher::registerWatch(watchtype_t type, const string& watch_)
 {
-	cout << "register watch" << endl;
+	m_watchFD = inotify_add_watch(m_inotifyFD, watch_.c_str(), type); 
+
+	if(-1 == m_watchFD)
+		return false;
+
 	return true;
 }
 
