@@ -9,12 +9,15 @@
 
 class Watcher : private boost::noncopyable
 {
+int m_inotifyFD;
+int m_watchFD;
+boost::function<void(void)> m_handler;
 public:
 typedef int watchtype_t;
 
-Watcher();
+explicit Watcher(bool blocking = false);
 
-bool registerHandler(boost::function<void(void)> handler);
+void registerHandler(const boost::function<void(void)>& handler);
 
 bool registerWatch(watchtype_t type, const std::string& watch_);
 };
