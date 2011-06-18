@@ -1,3 +1,4 @@
+#include <set>
 #include <string>
 #include <fcntl.h>
 #include <iostream>
@@ -10,12 +11,17 @@
 class Watcher : private boost::noncopyable
 {
 int m_inotifyFD;
-int m_watchFD;
+
+//Watch can be called on an already watched file, in which case the same fd is returned
+//We need a set to avoid duplicates. Insertion, traversal is going to be slower than vector
+//but given the cvheck for uniqueness this is the best choice.
+set<int> m_watchFDs; 
 boost::function<void(void)> m_handler;
 public:
 
 //File here means file/directory or any other kind of file.
-enum{FILE_ACCESSED=IN_ACCESS, 
+enum{
+	FILE_ACCESSED=IN_ACCESS, 
 	METADATA_CHANGED=IN_ATTRIB,
 	FILE_WRITE_CLOSED=IN_CLOSE_WRITE,
 	FILE_NOWRITE_CLOSED=IN_CLOSE_NOWRITE,
@@ -36,4 +42,6 @@ explicit Watcher(bool blocking = false);
 void registerHandler(const boost::function<void(void)>& handler);
 
 bool registerWatch(watchtype_t type, const std::string& watch_);
+
+bool run();
 };
