@@ -2,7 +2,7 @@
 
 using namespace std;
 
-Watcher::Watcher(bool blocking)
+Watcher::Watcher(bool blocking) : m_inotifyFD(0) 
 {
 	m_inotifyFD = inotify_init1(O_NONBLOCK);
 
@@ -17,13 +17,22 @@ void Watcher::registerHandler(const boost::function<void(void)>& handler )
 	m_handler = handler;
 }
 
+//Register watch type from one of those declared in Watcher.
 bool Watcher::registerWatch(watchtype_t type, const string& watch_)
 {
-	m_watchFD = inotify_add_watch(m_inotifyFD, watch_.c_str(), type); 
+	int watchFD = inotify_add_watch(m_inotifyFD, watch_.c_str(), type); 
 
-	if(-1 == m_watchFD)
+	if(-1 == watchFD)
 		return false;
 
+	m_watchFDs.insert(watchFD);
 	return true;
 }
 
+bool Watcher::run()
+{
+	if(!m_inotifyFD)
+		return false;
+
+
+}
