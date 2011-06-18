@@ -24,11 +24,6 @@ ContainerIterator m_itr;
 friend class Iterator<ContainerIterator, false>;
 public:
 
-Iterator(){}
-Iterator(ContainerIterator itr) : m_itr(itr)
-{
-}
-
 //Copy constructor that takes in the unsafe version
 Iterator(const Iterator& other)
 {
@@ -39,6 +34,9 @@ bool operator !=(const Iterator& other)
 {
 	return (m_itr != other.m_itr);
 }
+
+CONSTRUCTORS
+
 ITERATOR_TYPEDEFS
 
 OPERATOR_ARROW
@@ -57,7 +55,14 @@ friend class Iterator<ContainerIterator, true>;
 public:
 ITERATOR_TYPEDEFS
 
-Iterator(){}
+CONSTRUCTORS
+
+OPERATOR_ARROW
+
+UNWRAP_FUNC
+
+OPERATOR_COMPARISON
+
 T operator*() 
 {
         return *m_itr;
@@ -115,12 +120,6 @@ const Iterator<ContainerIterator, false>& operator=(const ContainerIterator& oth
         m_itr = other;
         return *this;
 }
-
-OPERATOR_ARROW
-
-UNWRAP_FUNC
-
-OPERATOR_COMPARISON
 
 };
 #endif
