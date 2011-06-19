@@ -1,4 +1,4 @@
-#include <set>
+#include <map>
 #include <string>
 #include <fcntl.h>
 #include <iostream>
@@ -12,11 +12,8 @@ class Watcher : private boost::noncopyable
 {
 int m_inotifyFD;
 
-//Watch can be called on an already watched file, in which case the same fd is returned
-//We need a set to avoid duplicates. Insertion, traversal is going to be slower than vector
-//but given the cvheck for uniqueness this is the best choice.
-set<int> m_watchFDs; 
-boost::function<void(void)> m_handler;
+//A map of the currently being watched fds versus the handlers registered for them
+map<int, boost::function<void(void)> > m_watchMap; 
 public:
 
 //File here means file/directory or any other kind of file.
@@ -39,9 +36,7 @@ typedef int watchtype_t;
 
 explicit Watcher(bool blocking = false);
 
-void registerHandler(const boost::function<void(void)>& handler);
-
-bool registerWatch(watchtype_t type, const std::string& watch_);
+bool registerWatch(watchtype_t type, const std::string& watch_, const boost::function<void (void)> & handler_);
 
 bool run();
 };
