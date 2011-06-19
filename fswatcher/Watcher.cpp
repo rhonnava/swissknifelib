@@ -69,14 +69,18 @@ bool Watcher::run()
 			switch(errno)
 			{
 				case EINTR:
+				continue;
 				break;
 				case EBADF: //Fall through
 				case EINVAL:
 				case ENOMEM:
 				default:
 				m_KeepRunning = 0;
+				continue;
 			}
 		}
+
+		
 	}
 }
 
