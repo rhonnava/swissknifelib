@@ -36,7 +36,9 @@ typedef int watchtype_t;
 
 explicit Watcher(bool blocking = false);
 
-bool registerWatch(watchtype_t type, const std::string& watch_, const boost::function<void (void)> & handler_);
+int registerWatch(watchtype_t type, const std::string& watch_, const boost::function<void (void)> & handler_);
 
 bool run();
+
+~Watcher();
 };
