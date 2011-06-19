@@ -1,5 +1,6 @@
 #include <map>
 #include <string>
+#include <errno.h>
 #include <fcntl.h>
 #include <iostream>
 #include <unistd.h>

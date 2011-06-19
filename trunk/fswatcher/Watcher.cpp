@@ -1,4 +1,6 @@
 #include "Watcher.hpp"
+#include <sys/select.h>
+#include <sys/time.h>
 
 using namespace std;
 
@@ -37,10 +39,44 @@ bool Watcher::run()
 {
 	if(!m_inotifyFD)
 		return false;
+
+	//Right now we are going to select only on one file descriptor which is the inotify fd
+	//But still prefered select over read.
+	struct timeval time;
+	fd_set readfds;
+	int ret;
+
+	//Select once in 5 seconds for new events
+	time.tv_sec = 5;
+	time.tv_usec = 0;
+
+	//REset all fds in the fd set and set the inotify fd
+	FD_ZERO (&readfds);
+	FD_SET (m_inotifyFD, &readfds);
 	
 	m_KeepRunning = 1;
 	while(m_KeepRunning)
 	{
+		int ret = select(m_inotifyFD+1 , &readfds, NULL, NULL, &time);
+
+		if(0 == ret)
+		{
+			continue;
+		}
+
+		if(-1 == ret)
+		{
+			switch(errno)
+			{
+				case EINTR:
+				break;
+				case EBADF: //Fall through
+				case EINVAL:
+				case ENOMEM:
+				default:
+				m_KeepRunning = 0;
+			}
+		}
 	}
 }
 
