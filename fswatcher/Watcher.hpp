@@ -3,6 +3,7 @@
 #include <fcntl.h>
 #include <iostream>
 #include <unistd.h>
+#include <signal.h>
 #include <sys/inotify.h>
 #include "Exception.hpp"
 #include <boost/utility.hpp>
@@ -11,12 +12,14 @@
 class Watcher : private boost::noncopyable
 {
 int m_inotifyFD;
-
+sig_atomic_t m_KeepRunning;
 //A map of the currently being watched fds versus the handlers registered for them
 map<int, boost::function<void(void)> > m_watchMap; 
 public:
 
 //File here means file/directory or any other kind of file.
+//You can do a bitwise or of multiple of these flags to watch
+// for multiple events.
 enum{
 	FILE_ACCESSED=IN_ACCESS, 
 	METADATA_CHANGED=IN_ATTRIB,
@@ -38,7 +41,11 @@ explicit Watcher(bool blocking = false);
 
 int registerWatch(watchtype_t type, const std::string& watch_, const boost::function<void (void)> & handler_);
 
+bool removeWatch(int wd);
+
 bool run();
+
+void stop();
 
 ~Watcher();
 };

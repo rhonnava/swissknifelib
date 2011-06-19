@@ -2,7 +2,7 @@
 
 using namespace std;
 
-Watcher::Watcher(bool blocking) : m_inotifyFD(0) 
+Watcher::Watcher(bool blocking) : m_inotifyFD(0), m_KeepRunning(0) 
 {
 	m_inotifyFD = inotify_init1(O_NONBLOCK);
 
@@ -28,16 +28,26 @@ int Watcher::registerWatch(watchtype_t type, const string& watch_, const boost::
 	return watchFD;
 }
 
+bool Watcher::removeWatch(int wd)
+{
+	inotify_rm_watch(m_inotifyFD, wd);			
+}
+
 bool Watcher::run()
 {
 	if(!m_inotifyFD)
 		return false;
-
 	
-
-
+	m_KeepRunning = 1;
+	while(m_KeepRunning)
+	{
+	}
 }
 
+void Watcher::stop()
+{
+	m_KeepRunning = 0;
+}
 Watcher::~Watcher()
 {
 	close(m_inotifyFD);	
