@@ -80,7 +80,10 @@ bool Watcher::run()
 			}
 		}
 
-		
+		if(FD_ISSET (m_inotifyFD, &readfds))
+		{
+			
+		}
 	}
 }
 
