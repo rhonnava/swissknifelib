@@ -40,49 +40,38 @@ bool Watcher::run()
 	if(!m_inotifyFD)
 		return false;
 
-	//Right now we are going to select only on one file descriptor which is the inotify fd
-	//But still prefered select over read.
-	struct timeval time;
-	fd_set readfds;
-	int ret;
+	//Length of the buffer we read in when inotify triggers
+	int EVENT_SIZE = sizeof(struct inotify_event);
+	int BUF_LEN = 1024 * (EVENT_SIZE + 16);
 
-	//Select once in 5 seconds for new events
-	time.tv_sec = 5;
-	time.tv_usec = 0;
+	unsigned char buf[BUF_LEN];
 
-	//REset all fds in the fd set and set the inotify fd
-	FD_ZERO (&readfds);
-	FD_SET (m_inotifyFD, &readfds);
-	
 	m_KeepRunning = 1;
 	while(m_KeepRunning)
 	{
-		int ret = select(m_inotifyFD+1 , &readfds, NULL, NULL, &time);
-
-		if(0 == ret)
-		{
+		int loc = 0;
+		int namelen = 0;
+		int readlen = read(m_inotifyFD, buf, BUF_LEN);
+	
+		if(0 == readlen)
 			continue;
-		}
 
-		if(-1 == ret)
+		if(-1 == readlen)
 		{
-			switch(errno)
-			{
-				case EINTR:
-				continue;
-				break;
-				case EBADF: //Fall through
-				case EINVAL:
-				case ENOMEM:
-				default:
-				m_KeepRunning = 0;
-				continue;
-			}
+			//Do all the handling as per errno
 		}
-
-		if(FD_ISSET (m_inotifyFD, &readfds))
-		{
 			
+		while(loc < readlen)
+		{
+			struct inotify_event* evt = reinterpret_cast<struct inotify_event*>(buf + loc);
+			
+			m_watchMapIterator itr = m_watchMap.find(evt->wd);
+			if(m_watchMap.end() != itr)
+			{
+				(itr->second)();
+			}
+
+			loc += evt->len + EVENT_SIZE;
 		}
 	}
 }
@@ -93,5 +82,5 @@ void Watcher::stop()
 }
 Watcher::~Watcher()
 {
-	close(m_inotifyFD);	
+	close(m_inotifyFD);
 }
