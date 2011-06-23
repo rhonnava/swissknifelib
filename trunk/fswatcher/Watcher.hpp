@@ -17,6 +17,7 @@ sig_atomic_t m_KeepRunning;
 //A map of the currently being watched fds versus the handlers registered for them
 std::map<int, boost::function<void(void)> > m_watchMap; 
 typedef  map<int, boost::function<void(void)> >::iterator m_watchMapIterator;
+bool m_ok_;
 public:
 
 //File here means file/directory or any other kind of file.
@@ -45,11 +46,17 @@ int registerWatch(watchtype_t type, const std::string& watch_, const boost::func
 
 bool removeWatch(int wd);
 
-size_t maxWatches();
+size_t maxWatches() const;
+
+inline size_t numWatches() const;
 
 bool run();
 
 inline void stop();
+
+inline operator bool() const;
+
+inline bool operator!() const;
 
 ~Watcher();
 };
