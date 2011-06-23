@@ -8,7 +8,7 @@
 using namespace std;
 using namespace boost;
 
-struct Watcher::watch
+struct Watcher::watch_t
 {
 //Variables needed to register a watch again
 bool m_sticky;
@@ -49,7 +49,7 @@ int Watcher::registerWatch(watchtype_t type, const string& watch_, const boost::
 		return watchFD;
 
 	//Set watch with all the params
-	watch w;
+	watch_t w;
 	w.m_sticky = sticky_;
 	w.m_path = watch_;
 	w.m_watchType = type;
@@ -126,7 +126,7 @@ bool Watcher::run()
 			WatchMapIterator itr = m_watchMap.find(evt->wd);
 			if(m_watchMap.end() != itr)
 			{
-				watch value = itr->second;
+				watch_t value = itr->second;
 				value.m_f();
 				m_watchMap.erase(itr);
 

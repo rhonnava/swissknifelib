@@ -6,18 +6,17 @@
 #include <unistd.h>
 #include <signal.h>
 #include <sys/inotify.h>
-#include "Exception.hpp"
 #include <boost/utility.hpp>
 #include <boost/function.hpp>
 
 class Watcher : private boost::noncopyable
 {
-struct watch;
+struct watch_t;
 int m_inotifyFD;
 sig_atomic_t m_KeepRunning;
 //A map of the currently being watched fds versus the handlers registered for them
-std::map<int, watch> m_watchMap; 
-typedef  map<int, watch>::iterator WatchMapIterator;
+std::map<int, watch_t> m_watchMap; 
+typedef std::map<int, watch_t>::iterator WatchMapIterator;
 bool m_ok_;
 
 
