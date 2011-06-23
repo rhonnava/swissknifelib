@@ -13,7 +13,6 @@
 class Watcher : private boost::noncopyable
 {
 struct watch;
-
 int m_inotifyFD;
 sig_atomic_t m_KeepRunning;
 //A map of the currently being watched fds versus the handlers registered for them
@@ -48,7 +47,7 @@ typedef int watchtype_t;
 //Use safe bool and operator! to check if the object is fine before registering watches
 explicit Watcher(bool blocking = false);
 
-int registerWatch(watchtype_t type, const std::string& watch_, const boost::function<void (void)> & handler_, bool sticky_=1);
+int registerWatch(watchtype_t type, const std::string& watch_, const boost::function<void (void)> & handler_, bool sticky_=true);
 
 bool removeWatch(int wd);
 
