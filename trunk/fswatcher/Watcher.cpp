@@ -30,6 +30,9 @@ inline bool Watcher::operator!() const
 //Register watch type from one of those declared in Watcher.
 int Watcher::registerWatch(watchtype_t type, const string& watch_, const boost::function<void(void)>& handler_)
 {
+	if(!m_ok_)
+		return -1;
+
 	int watchFD = inotify_add_watch(m_inotifyFD, watch_.c_str(), type); 
 
 	//Log an error here when the logging toolkit is done.
@@ -42,7 +45,27 @@ int Watcher::registerWatch(watchtype_t type, const string& watch_, const boost::
 
 bool Watcher::removeWatch(int wd)
 {
-	inotify_rm_watch(m_inotifyFD, wd);			
+	WatchMapIterator itr = m_watchMap.find(wd);
+	if(m_watchMap.end() == itr)
+	{
+		return false;
+	}
+
+	if(-1 == inotify_rm_watch(m_inotifyFD, wd))
+	{
+		switch(errno)
+		{
+			case EBADF:
+			case EINVAL:
+			default:
+				cout << "Unable to remove watch due to bad inotify fd or watch fd" << endl;
+		}
+	
+		return false;
+	}
+
+	m_watchMap.erase(itr);
+	return true;
 }
 
 bool Watcher::run()
@@ -85,7 +108,7 @@ bool Watcher::run()
 		{
 			struct inotify_event* evt = reinterpret_cast<struct inotify_event*>(buf + loc);
 			
-			m_watchMapIterator itr = m_watchMap.find(evt->wd);
+			WatchMapIterator itr = m_watchMap.find(evt->wd);
 			if(m_watchMap.end() != itr)
 			{
 				(itr->second)();
@@ -100,7 +123,7 @@ bool Watcher::run()
 size_t Watcher::maxWatches() const
 {
 	//I am discouraged from using _sysctl(see man page). So, going into procfs. 
-	ifstream procfile(INOTIFY_MAX_WATCHES_FILE, ifstream::in);
+	ifstream procfile(internal::INOTIFY_MAX_WATCHES_FILE, ifstream::in);
 	size_t ret = 0;
 	if(procfile.good())
 	{
