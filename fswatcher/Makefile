@@ -7,7 +7,7 @@ endif
 
 OBJS = Watcher.o
 SHARED_FLAG = -shared
-INCLUDES = -I../utils/
+INCLUDES = -I../utils/ -I.
 LIBS = -lstdc++
 
 shared : Watcher.o

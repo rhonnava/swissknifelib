@@ -45,9 +45,11 @@ int registerWatch(watchtype_t type, const std::string& watch_, const boost::func
 
 bool removeWatch(int wd);
 
+size_t maxWatches();
+
 bool run();
 
-void stop();
+inline void stop();
 
 ~Watcher();
 };
