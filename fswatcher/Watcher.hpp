@@ -16,7 +16,7 @@ int m_inotifyFD;
 sig_atomic_t m_KeepRunning;
 //A map of the currently being watched fds versus the handlers registered for them
 std::map<int, boost::function<void(void)> > m_watchMap; 
-typedef  map<int, boost::function<void(void)> >::iterator m_watchMapIterator;
+typedef  map<int, boost::function<void(void)> >::iterator WatchMapIterator;
 bool m_ok_;
 public:
 
@@ -40,6 +40,8 @@ enum{
 
 typedef int watchtype_t;
 
+//The object gets created even if we are not able to create a valid inotify instance
+//Use safe bool and operator! to check if the object is fine before registering watches
 explicit Watcher(bool blocking = false);
 
 int registerWatch(watchtype_t type, const std::string& watch_, const boost::function<void (void)> & handler_);
