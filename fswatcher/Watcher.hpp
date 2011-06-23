@@ -12,12 +12,16 @@
 
 class Watcher : private boost::noncopyable
 {
+struct watch;
+
 int m_inotifyFD;
 sig_atomic_t m_KeepRunning;
 //A map of the currently being watched fds versus the handlers registered for them
-std::map<int, boost::function<void(void)> > m_watchMap; 
-typedef  map<int, boost::function<void(void)> >::iterator WatchMapIterator;
+std::map<int, watch> m_watchMap; 
+typedef  map<int, watch>::iterator WatchMapIterator;
 bool m_ok_;
+
+
 public:
 
 //File here means file/directory or any other kind of file.
@@ -44,7 +48,7 @@ typedef int watchtype_t;
 //Use safe bool and operator! to check if the object is fine before registering watches
 explicit Watcher(bool blocking = false);
 
-int registerWatch(watchtype_t type, const std::string& watch_, const boost::function<void (void)> & handler_);
+int registerWatch(watchtype_t type, const std::string& watch_, const boost::function<void (void)> & handler_, bool sticky_=1);
 
 bool removeWatch(int wd);
 
