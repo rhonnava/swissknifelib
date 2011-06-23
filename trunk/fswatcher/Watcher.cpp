@@ -1,8 +1,12 @@
 #include "Watcher.hpp"
 #include <sys/select.h>
 #include <sys/time.h>
+#include <fstream>
+#include <boost/lexical_cast.hpp>
+#include "internal/defs.hpp"
 
 using namespace std;
+using namespace boost;
 
 Watcher::Watcher(bool blocking) : m_inotifyFD(0), m_KeepRunning(0) 
 {
@@ -84,6 +88,33 @@ bool Watcher::run()
 			loc += evt->len + EVENT_SIZE;
 		}
 	}
+}
+
+//Use scopeguard here once its written
+size_t Watcher::maxWatches()
+{
+	//I am discouraged from using _sysctl(see man page). So, going into procfs. 
+	ifstream procfile(INOTIFY_MAX_WATCHES_FILE, ifstream::in);
+	size_t ret = 0;
+	if(procfile.good())
+	{
+		char buffer[32];
+		memset(&buffer, 0, sizeof(buffer));
+		procfile.getline(buffer, 31);
+	
+		try
+		{	
+			ret = lexical_cast<size_t>(buffer);
+		}
+		catch(bad_lexical_cast & e)
+		{
+			//Do nothing 
+		}
+
+		procfile.close();
+	}
+
+	return ret;
 }
 
 void Watcher::stop()
