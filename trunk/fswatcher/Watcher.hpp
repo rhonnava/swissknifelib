@@ -15,7 +15,7 @@ class Watcher : private boost::noncopyable
 int m_inotifyFD;
 sig_atomic_t m_KeepRunning;
 //A map of the currently being watched fds versus the handlers registered for them
-map<int, boost::function<void(void)> > m_watchMap; 
+std::map<int, boost::function<void(void)> > m_watchMap; 
 typedef  map<int, boost::function<void(void)> >::iterator m_watchMapIterator;
 public:
 

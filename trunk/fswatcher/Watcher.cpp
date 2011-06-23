@@ -6,7 +6,7 @@ using namespace std;
 
 Watcher::Watcher(bool blocking) : m_inotifyFD(0), m_KeepRunning(0) 
 {
-	m_inotifyFD = inotify_init1(O_NONBLOCK);
+	m_inotifyFD = inotify_init1(0);
 
 	//Throwing in the constructor is not the best of things to do, but
 	//if you are not able to get a handle to inotify there is nothing you
@@ -59,6 +59,16 @@ bool Watcher::run()
 		if(-1 == readlen)
 		{
 			//Do all the handling as per errno
+			switch(errno)
+			{
+				case EINTR:
+					continue;
+				case EFAULT: //Fall through
+				case EINVAL:
+				case EBADF:
+				default:
+					break;
+			}
 		}
 			
 		while(loc < readlen)
