@@ -8,19 +8,25 @@
 using namespace std;
 using namespace boost;
 
-Watcher::Watcher(bool blocking) : m_inotifyFD(0), m_KeepRunning(0) 
+Watcher::Watcher(bool blocking) : m_inotifyFD(0), m_KeepRunning(0), m_ok_(false)
 {
 	m_inotifyFD = inotify_init1(0);
+	
+	if(m_inotifyFD > 0)
+		m_ok_ = true;
 
-	//Throwing in the constructor is not the best of things to do, but
-	//if you are not able to get a handle to inotify there is nothing you
-	//can do with a Watcher object.
-	if (-1 == m_inotifyFD || 0 == m_inotifyFD)
-	{
-		throw Exception(L"Unable to initialize Watcher"); //Add strerror once Exception class is ready
-	}
 }
 
+inline Watcher::operator bool() const
+{
+	return m_ok_;
+}
+
+
+inline bool Watcher::operator!() const
+{
+	return !m_ok_;
+}
 //Register watch type from one of those declared in Watcher.
 int Watcher::registerWatch(watchtype_t type, const string& watch_, const boost::function<void(void)>& handler_)
 {
@@ -91,7 +97,7 @@ bool Watcher::run()
 }
 
 //Use scopeguard here once its written
-size_t Watcher::maxWatches()
+size_t Watcher::maxWatches() const
 {
 	//I am discouraged from using _sysctl(see man page). So, going into procfs. 
 	ifstream procfile(INOTIFY_MAX_WATCHES_FILE, ifstream::in);
@@ -115,6 +121,11 @@ size_t Watcher::maxWatches()
 	}
 
 	return ret;
+}
+
+size_t Watcher::numWatches() const
+{
+	return m_watchMap.size();
 }
 
 void Watcher::stop()
