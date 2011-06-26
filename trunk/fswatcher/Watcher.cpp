@@ -7,19 +7,12 @@
 
 using namespace std;
 using namespace boost;
+using namespace internal;
 
-struct Watcher::watch_t
-{
-//Variables needed to register a watch again
-bool m_sticky;
-string m_path;
-int m_watchType;
-function<void(void)> m_f;
-};
 
-Watcher::Watcher(bool blocking) : m_inotifyFD(0), m_KeepRunning(0), m_ok_(false)
+Watcher::Watcher() : m_inotifyFD(0), m_KeepRunning(0), m_ok_(false)
 {
-	m_inotifyFD = inotify_init1(0);
+	m_inotifyFD = inotify_init();
 	
 	if(m_inotifyFD > 0)
 		m_ok_ = true;
@@ -37,23 +30,19 @@ inline bool Watcher::operator!() const
 	return !m_ok_;
 }
 //Register watch type from one of those declared in Watcher.
-int Watcher::registerWatch(watchtype_t type, const string& watch_, const boost::function<void(void)>& handler_, bool sticky_ )
+int Watcher::registerWatch(watchtype_t type_, const string& path_, const boost::function<void(void)>& handler_, bool sticky_ )
 {
 	if(!m_ok_)
 		return -1;
 
-	int watchFD = inotify_add_watch(m_inotifyFD, watch_.c_str(), type); 
+	int watchFD = inotify_add_watch(m_inotifyFD, path_.c_str(), type_); 
 
 	//Log an error here when the logging toolkit is done.
 	if(-1 == watchFD)
 		return watchFD;
 
 	//Set watch with all the params
-	watch_t w;
-	w.m_sticky = sticky_;
-	w.m_path = watch_;
-	w.m_watchType = type;
-	w.m_f =  handler_;
+	watch_t w = make_tuple(sticky_, path_, type_, handler_);
 	m_watchMap.insert(make_pair(watchFD, w));
 	return watchFD;
 }
@@ -127,13 +116,13 @@ bool Watcher::run()
 			if(m_watchMap.end() != itr)
 			{
 				watch_t value = itr->second;
-				value.m_f();
+				(value.get<FUNC>())();
 				m_watchMap.erase(itr);
 
 				//If watch is sticky then we need to reregister 
-				if(value.m_sticky)
+				if(value.get<STICKY>())
 				{
-					registerWatch(value.m_watchType, value.m_path, value.m_f, value.m_sticky);
+					registerWatch(value.get<WATCHTYPE>(), value.get<PATH>(), value.get<FUNC>(), value.get<STICKY>());
 				}
 			}
 
@@ -146,7 +135,7 @@ bool Watcher::run()
 size_t Watcher::maxWatches() const
 {
 	//I am discouraged from using _sysctl(see man page). So, going into procfs. 
-	ifstream procfile(internal::INOTIFY_MAX_WATCHES_FILE, ifstream::in);
+	ifstream procfile(INOTIFY_MAX_WATCHES_FILE, ifstream::in);
 	size_t ret = 0;
 	if(procfile.good())
 	{
