@@ -8,10 +8,11 @@
 #include <sys/inotify.h>
 #include <boost/utility.hpp>
 #include <boost/function.hpp>
+#include <boost/tuple/tuple.hpp>
 
 class Watcher : private boost::noncopyable
 {
-struct watch_t;
+typedef boost::tuple<bool, std::string, int, boost::function<void(void)> >  watch_t;
 int m_inotifyFD;
 sig_atomic_t m_KeepRunning;
 //A map of the currently being watched fds versus the handlers registered for them
@@ -44,9 +45,9 @@ typedef int watchtype_t;
 
 //The object gets created even if we are not able to create a valid inotify instance
 //Use safe bool and operator! to check if the object is fine before registering watches
-explicit Watcher(bool blocking = false);
+explicit Watcher();
 
-int registerWatch(watchtype_t type, const std::string& watch_, const boost::function<void (void)> & handler_, bool sticky_=true);
+int registerWatch(watchtype_t type_, const std::string& path_, const boost::function<void (void)> & handler_, bool sticky_=true);
 
 bool removeWatch(int wd);
 
