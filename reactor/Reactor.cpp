@@ -5,7 +5,9 @@
 #include <errno.h>
 #include <sys/epoll.h>
 
-Reactor::Reactor() : m_ok_(false)
+using namespace std;
+
+Reactor::Reactor() : m_ok_(false), m_KeepRunning(false)
 {
 	//Create an epoll fd with FD_CLOSEXEC set on it
 	m_ePollFD = epoll_create1(EPOLL_CLOEXEC); 
@@ -67,11 +69,43 @@ bool Reactor::registerWatch(int type_, int fd_, const boost::function<void(void)
 
 	if(0 == epoll_ctl(m_ePollFD, EPOLL_CTL_ADD, fd_, &event_))
 	{
-		return true;	
+		m_map.insert(make_pair(fd_, fn_) );
+		return true;
 	}
 
+	//handle errno here
 }
 
+bool Reactor::run()
+{
+	if(!m_ok_)
+		return false;
+
+	m_KeepRunning = true;
+	struct epoll_event events_[MAX_EPOLL_WAIT_EVENTS];
+
+	//Fillup a sigset and block all signals until epoll_wait returns
+	sigset_t mask_;
+	sigfillset(&mask_);
+
+	while(m_KeepRunning)
+	{
+		int ntriggered = epoll_pwait(m_ePollFD, events_, MAX_EPOLL_WAIT_EVENTS, EPOLL_WAIT_TIMEOUT, &mask_);
+
+		for(int i=0; i<ntriggered; ++i)
+		{
+			if(m_map.end() != m_map.find(events_[i].data.fd))
+			{
+				m_map[events_[i].data.fd]();
+			}
+		}
+	}
+}
+
+void Reactor::stop()
+{
+	m_KeepRunning = false;
+}
 Reactor::~Reactor()
 {
 	if( -1 == close(m_ePollFD))
