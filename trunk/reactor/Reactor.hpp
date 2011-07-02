@@ -11,6 +11,7 @@ class Reactor : private boost::noncopyable
 bool m_ok_;
 int m_ePollFD;
 std::map<int, boost::function<void(void)> > m_map;
+typedef std::map<int, boost::function<void(void)> >::iterator MapIterator;
 sig_atomic_t m_KeepRunning;
 public:
 Reactor(); 
