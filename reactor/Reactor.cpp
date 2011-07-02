@@ -94,9 +94,10 @@ bool Reactor::run()
 
 		for(int i=0; i<ntriggered; ++i)
 		{
-			if(m_map.end() != m_map.find(events_[i].data.fd))
+			MapIterator itr = m_map.find(events_[i].data.fd);
+			if(m_map.end() != itr)
 			{
-				m_map[events_[i].data.fd]();
+				(itr->second)();
 			}
 		}
 	}
