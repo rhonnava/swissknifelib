@@ -32,8 +32,11 @@ int modifyWatch();
 
 int removeWatch();
 
+//Blocks this thread, so this needs to be called in a separate thread, probably in a daemon.
 bool run();
 
+//This is thread safe and re-entrant, so can be called from a signal handler in the client code
+//(probably to stop a daemon)
 inline void stop();
 
 ~Reactor();
