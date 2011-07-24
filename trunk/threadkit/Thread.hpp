@@ -105,4 +105,9 @@ virtual ~Thread()
 }
 };
 
+template <typename T>
+class thread_traits
+{
+
+};
 #endif
