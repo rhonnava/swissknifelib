@@ -19,6 +19,7 @@
 #include <boost/lambda/lambda.hpp>
 #include <boost/static_assert.hpp>
 
+
 using namespace std;
 //The resource pool
 template <typename T, typename Container = deque< pair<T, bool> > >
